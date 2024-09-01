@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RateCoin</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.1.1"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5dc;
+            color: #333;
+            margin: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #006400;
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-size: 3rem;
+            font-weight: bold;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            color: #8b4513;
+            text-align: center;
+            margin-top: -10px;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            font-weight: normal;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        canvas {
+            max-width: 100%;
+            height: auto;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #ffffff;
+            padding: 20px;
+        }
+        .info {
+            max-width: 600px;
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #333;
+            text-align: left;
+            margin: 20px auto;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #006400;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>RateCoin</h1>
+    <h2>Taxa de Câmbio - R$ / US$</h2>
+    <canvas id="exchangeRateChart" width="800" height="400"></canvas>
+    <div class="info">
+        <h3>Informações:</h3>
+        <p><strong>Frequência:</strong> Diária de 02/01/2020 até o dia vigente (dados filtrados da base de dados utilizada)</p>
+        <p><strong>Fonte:</strong> Banco Central do Brasil, Sistema Gerenciador de Séries Temporais (Bacen Outras/SGS)</p>
+        <p><strong>Unidade:</strong> R$</p>
+        <p><strong>Comentário:</strong> A taxa de câmbio é o preço de uma moeda estrangeira medido em unidades ou frações (centavos) da moeda nacional, refletindo o custo de uma moeda em relação à outra. O dólar comercial é a cotação do valor do dólar utilizado nas operações realizadas no mercado de câmbio, por exemplo: exportação, importação, transferências financeiras. Também conhecida como PTAX, esta cotação corresponde à média aritmética das taxas de compra das consultas realizadas diariamente. Nota: Taxa de câmbio R$/US$ comercial (valor de compra). Refere-se às taxas administradas até 13 de março de 1990 e às taxas livres a partir dessa data (Resolução 1690, de 18.3.1990).</p>
+    </div>
+    <script>
+        // Dados do gráfico
+        const data = <%- JSON.stringify(data) %>;
+
+        // Agrupar dados por mês
+        const groupedData = {};
+        data.forEach(item => {
+            const date = new Date(item.Data);
+            const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`; // Formato: "YYYY-M"
+            if (!groupedData[monthYear]) {
+                groupedData[monthYear] = [];
+            }
+            groupedData[monthYear].push(item['Taxa de câmbio - R$ / US$']);
+        });
+
+        // Calcular a média de taxa de câmbio por mês
+        const labelsMonthly = Object.keys(groupedData);
+        const valuesMonthly = labelsMonthly.map(monthYear => {
+            const rates = groupedData[monthYear];
+            const sum = rates.reduce((acc, rate) => acc + rate, 0);
+            return sum / rates.length;
+        });
+
+        // Preparar dados diários
+        const labelsDaily = data.map(item => new Date(item.Data));
+        const valuesDaily = data.map(item => item['Taxa de câmbio - R$ / US$']);
+
+        // Configuração do gráfico
+        const ctx = document.getElementById('exchangeRateChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labelsMonthly.map(label => new Date(label)),
+                datasets: [{
+                    label: ' Taxa de Câmbio - R$ / US$',
+                    data: valuesMonthly,
+                    borderColor: 'rgba(34, 139, 34, 1)',
+                    backgroundColor: 'rgba(34, 139, 34, 0.2)',
+                    borderWidth: 3,
+                    pointBackgroundColor: 'rgba(34, 139, 34, 1)',
+                    pointBorderColor: '#ffffff',
+                    pointHoverBackgroundColor: '#ffffff',
+                    pointHoverBorderColor: 'rgba(34, 139, 34, 1)',
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            color: '#333',
+                            font: {
+                                size: 14,
+                                family: 'Arial, sans-serif',
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(218, 165, 32, 0.9)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        titleFont: {
+                            size: 16,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 14
+                        },
+                        padding: 10
+                    },
+                    zoom: {
+                        zoom: {
+                            wheel: {
+                                enabled: true,
+                                mode: 'xy'
+                            },
+                            pinch: {
+                                enabled: true,
+                                mode: 'xy'
+                            }
+                        },
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'month',
+                            tooltipFormat: 'MMM yyyy'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Data',
+                            color: '#333',
+                            font: {
+                                size: 16,
+                                weight: 'bold',
+                                family: 'Arial, sans-serif'
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Taxa de Câmbio',
+                            color: '#333',
+                            font: {
+                                size: 16,
+                                weight: 'bold',
+                                family: 'Arial, sans-serif'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Atualizar o gráfico ao dar zoom
+        chart.options.plugins.zoom.zoom.onZoom = function({chart}) {
+            // Checar o nível de zoom atual
+            const minDate = chart.scales.x.min;
+            const maxDate = chart.scales.x.max;
+            const timeSpan = maxDate - minDate;
+
+            // Se o tempo mostrado é menor que 2 meses, mudar para dados diários
+            if (timeSpan < (2 * 30 * 24 * 60 * 60 * 1000)) { // 2 meses em milissegundos
+                chart.data.labels = labelsDaily;
+                chart.data.datasets[0].data = valuesDaily;
+                chart.options.scales.x.time.unit = 'day';
+            } else { // Caso contrário, voltar para dados mensais
+                chart.data.labels = labelsMonthly.map(label => new Date(label));
+                chart.data.datasets[0].data = valuesMonthly;
+                chart.options.scales.x.time.unit = 'month';
+            }
+
+            chart.update('none'); // 'none' para não animar a atualização do gráfico
+        };
+
+        chart.update();
+    </script>
+</body>
+</html>

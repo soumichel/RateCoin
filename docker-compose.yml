@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  node_server:
+    build:
+      context: ./node_server
+      dockerfile: Dockerfile-node
+    container_name: container-node
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./node_server/.env
+    networks:
+      - app-network
+
+  python_module:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: container-python
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

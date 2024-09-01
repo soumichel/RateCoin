@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado da Notificação</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5dc;
+            color: #333;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        h1 {
+            color: <%= success ? '#28a745' : '#dc3545' %>;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            font-weight: bold;
+            line-height: 1.2;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.05);
+        }
+        p {
+            font-size: 1.2rem;
+            margin: 0;
+            padding: 0 20px;
+            max-width: 600px;
+            line-height: 1.6;
+            color: #666;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 20px;
+            font-size: 1rem; 
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            border: 1px solid #0066cc;
+            background-color: #ffffff;
+            box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.05);
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #004d99;
+            background-color: #f0f8ff;
+        }
+    </style>
+</head>
+<body>
+    <h1><%= message %></h1>
+    <a href="/notify">Voltar ao formulário</a>
+</body>
+</html>

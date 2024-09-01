@@ -1,0 +1,54 @@
+# Etapa 1: Build
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Instalar dependências de sistema necessárias para compilar canvas
+RUN apk add --no-cache \
+    build-base \
+    cairo-dev \
+    pango-dev \
+    jpeg-dev \
+    giflib-dev \
+    librsvg-dev
+
+# Copiar package.json e package-lock.json
+COPY package*.json ./
+
+# Instalar as dependências de produção e desenvolvimento
+RUN npm install --only=production
+
+# Copiar o restante dos arquivos da aplicação
+COPY . .
+
+# Remover arquivos desnecessários para reduzir o tamanho da imagem
+RUN rm -rf /app/tests \
+           /app/logs \
+           /app/temp \
+           /app/*.md \
+           /app/node_modules/.bin \
+           /app/node_modules/*/README \
+           /app/node_modules/*/test \
+           /app/node_modules/*/docs
+
+# Etapa 2: Produção
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Instalar apenas as dependências necessárias para runtime
+RUN apk add --no-cache \
+    cairo \
+    pango \
+    jpeg \
+    giflib \
+    librsvg
+
+# Copiar as dependências e o código da primeira etapa
+COPY --from=builder /app /app
+
+# Expor a porta que o servidor vai utilizar
+EXPOSE 3000
+
+# Comando para rodar o servidor
+CMD ["node", "server.js"]
