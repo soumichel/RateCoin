@@ -35,3 +35,7 @@ Este projeto é uma aplicação que extrai dados do site do Ipeadata sobre a Tax
 
 - Docker
 - Docker Compose
+
+---
+
+Projeto desenvolvido para a disciplina Sistemas Distribuídos, realizada na Universidade Federal de Lavras.
